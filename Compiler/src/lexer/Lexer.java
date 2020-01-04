@@ -129,7 +129,7 @@ public class Lexer {
 		public Token getToken();
 	}
 
-	private static class LexerException extends Exception {
+	static class LexerException extends Exception {
 		private static final long serialVersionUID = 2085479406987624432L;
 	}
 }

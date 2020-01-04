@@ -1,5 +1,4 @@
-package testing;
-
+package lexer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,14 +8,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import lexer.Lexer;
-import lexer.Token;
-import lexer.TokenType;
 
 class LexerTest {
 
 	@Test
-	void identifierLineTest() throws LexerException {
+	void identifierLineTest() throws Lexer.LexerException {
 		String input = "foo\nbar";
 		Lexer lexer = new Lexer(input);
 		List<Token> list = Arrays.asList(
@@ -26,7 +22,7 @@ class LexerTest {
 	}
 	
 	@Test
-	void keywordTest() throws LexerException {
+	void keywordTest() throws Lexer.LexerException {
 		String input = "int struct union if else while for break continue sizeof";
 		Lexer lexer = new Lexer(input);
 		List<Token> list = Arrays.asList(
@@ -44,7 +40,7 @@ class LexerTest {
 	}
 	
 	@Test
-	void literalTest() throws LexerException {
+	void literalTest() throws Lexer.LexerException {
 		String input = "123 45";
 		Lexer lexer = new Lexer(input);
 		List<Token> list = Arrays.asList(
@@ -54,7 +50,7 @@ class LexerTest {
 	}
 	
 	@Test
-	void symbolicCharacter() throws LexerException {
+	void symbolicCharacter() throws Lexer.LexerException {
 		String input = "( ) {}[];+ - * / % ~ & | ^ ! . -> = += -= "
 				+ "*= /= %= &= |= ^= <<= >>=<< >> && || == "
 				+ "!= ++ -- < <= > >=";
@@ -110,6 +106,6 @@ class LexerTest {
 		String input = "\"";
 		Lexer lexer = new Lexer(input);
 		
-		assertThrows(LexerException.class, () -> lexer.getTokenList());
+		assertThrows(Lexer.LexerException.class, () -> lexer.getTokenList());
 	}
 }

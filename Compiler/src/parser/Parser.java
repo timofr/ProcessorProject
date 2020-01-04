@@ -104,7 +104,7 @@ public class Parser {
 
 		return null;
 	}
-
+	
 	private TypedefDataType parseTypedefDataType(List<TokenType> qualifiers) {
 		if (peek().getType() != TokenType.IDENTIFIER) {
 			return null;
