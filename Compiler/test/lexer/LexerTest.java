@@ -1,15 +1,20 @@
 package lexer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import main.Main;
 
-class LexerTest {
+
+class LexerTest extends AbstractTest {
 
 	@Test
 	void identifierLineTest() throws Lexer.LexerException {
@@ -19,6 +24,7 @@ class LexerTest {
 				new Token(TokenType.IDENTIFIER, "foo", 1),
 				new Token(TokenType.IDENTIFIER, "bar", 2));
 		assertEquals(list, lexer.getTokenList());
+		assertFalse(Main.hadError());
 	}
 	
 	@Test
@@ -37,6 +43,7 @@ class LexerTest {
 				new Token(TokenType.CONTINUE, "continue", 1),
 				new Token(TokenType.SIZEOF, "sizeof", 1));
 		assertEquals(list, lexer.getTokenList());
+		assertFalse(Main.hadError());
 	}
 	
 	@Test
@@ -47,6 +54,7 @@ class LexerTest {
 				new Token(TokenType.LITERAL, "123", 1),
 				new Token(TokenType.LITERAL, "45", 1));
 		assertEquals(list, lexer.getTokenList());
+		assertFalse(Main.hadError());
 	}
 	
 	@Test
@@ -99,13 +107,20 @@ class LexerTest {
 				new Token(TokenType.GREATER, ">", 1),
 				new Token(TokenType.GREATEREQUAL, ">=", 1));
 		assertEquals(list, lexer.getTokenList());
+		assertFalse(Main.hadError());
 	}
-	
+
 	@Test
-	void exceptionTest() {
-		String input = "\"";
+	void errorTest() {
+		String input = "test\\123";
 		Lexer lexer = new Lexer(input);
 		
-		assertThrows(Lexer.LexerException.class, () -> lexer.getTokenList());
+
+		List<Token> list = Arrays.asList(
+				new Token(TokenType.IDENTIFIER, "test", 1),
+				new Token(TokenType.LITERAL, "123", 1));
+		assertEquals(list, lexer.getTokenList()); 
+		assertTrue(Main.hadError());
 	}
+
 }

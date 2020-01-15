@@ -53,6 +53,8 @@ public class Lexer {
 
 			if (!handler.isPresent()) {
 				Main.error(line, "Unkown character \"" + currentChar);
+				consume();
+				continue;
 			}
 
 			Token token = handler.get().getToken();
