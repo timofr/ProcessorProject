@@ -9,8 +9,8 @@ import main.Main;
 class AbstractTest {
     @BeforeEach
     void resetError() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		Field errorOccured = Main.class.getDeclaredField("errorOccured");
-		errorOccured.setAccessible(true);
-		errorOccured.set(null, false);
+      Field errorOccured = Main.class.getDeclaredField("errorOccured");
+      errorOccured.setAccessible(true);
+      errorOccured.set(null, false);
     }
 }

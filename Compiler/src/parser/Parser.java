@@ -154,18 +154,18 @@ public class Parser {
 	}
 
 	private List<TokenType> parseQualifier() {
-		return parseKeywordsFromSet(TokenType.QUALIFIERS, "qualifier");
+		return parseKeywordsFromSet(TokenType.QUALIFIERS, "Expected a data type after a qualifier .");
 	}
 
 	private List<TokenType> parseModifier() {
-		return parseKeywordsFromSet(TokenType.MODIFIERS, "modifier");
+		return parseKeywordsFromSet(TokenType.MODIFIERS, "Expected a data type after a modifier.");
 	}
 
-	private List<TokenType> parseKeywordsFromSet(TokenType[] keywordSet, String type) {
+	private List<TokenType> parseKeywordsFromSet(TokenType[] keywordSet, String errorMsg) {
 		List<TokenType> keywords = new ArrayList<TokenType>();
 		while (Arrays.stream(keywordSet).anyMatch(t -> t == peek().getType())) {
 			keywords.add(peek().getType());
-			consume("Expected a data type after a " + type + ".");
+			consume(errorMsg);
 		}
 		return keywords;
 	}
@@ -182,6 +182,11 @@ public class Parser {
 		return peek();
 	}
 
+	private Token checkAndConsume(String errorMsg, TokenType... types) {
+		//check(types, errorMsg);
+		consume(errorMsg); //FIXME errormsg will be different
+		return null;
+	}
 	private boolean isAtEnd() {
 		return peek().getType() == TokenType.EOF;
 	}
@@ -198,10 +203,15 @@ public class Parser {
 		return peek().getLine();
 	}
 
-	private boolean check(TokenType type) {
-		if (isAtEnd()) return false;         
-		return peek().getType() == type;          
+	private boolean match(TokenType... types) {
+		return Arrays.stream(types).anyMatch(t -> t == peek().getType());
 	} 
+
+	private void check(TokenType... types) throws ParseException {
+		if (!match(types)) {
+			throw error(types.toString());
+		}
+	}
 
 	private ParseException error(Token token, String message) {
 	    Main.error(token, message);
