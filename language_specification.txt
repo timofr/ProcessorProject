@@ -1,0 +1,18 @@
+The programming language is based on the C-Programming Language.
+It provides a subset of the original C functionality.
+
+At global scope:
+function declarations, variable declarations, pointer declaration, function pointer declaration, typedef declaration
+
+At local scope:
+variable declaration, pointer declaration, function pointer declaration, typedef declaration
+
+Function declaration:
+Storage specifiers: Extern, static (Optional, x <= 1)
+Returntype(Mandatory, x = 1) can use type qualifiers and type modifiers
+Functionname(Mandatory, x= 1)
+Parameterlist (Mandatory, 0 <= x < infinity)
+Functionbody (Optional, x <= 1) If functionbody is present -> function definition 
+
+Variable declaration 
+

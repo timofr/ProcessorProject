@@ -1,5 +1,7 @@
 package lexer;
 
+import java.util.Arrays;
+
 public enum TokenType {
 	EOF(Character.toString(Lexer.EOF)),
 	
@@ -17,9 +19,21 @@ public enum TokenType {
 	BREAK("break"),
 	CONTINUE("continue"),
 	SIZEOF("sizeof"),
-	
+	GOTO("goto"),
+
+	SHORT("short"),
+	LONG("long"),
+	SIGNED("signed"),
+	UNSIGNED("unsigned"),
+
+	EXTERN("extern"),
 	STATIC("static"),
-	
+	REGISTER("register"),
+	AUTO("auto"),
+
+	CONST("const"),
+	VOLATILE("volatile"),
+
 	TYPEDEF("typedef"),
 	
 	//SEPARATOR
@@ -83,14 +97,49 @@ public enum TokenType {
 			RPAREN, LPAREN, LSQUARE, RSQUARE};
 	public static final TokenType[] SEPARATORS = {LBRACE, RBRACE, SEMI};
 	
-	
-	public static final TokenType[] QUALIFIERS = {STATIC};
-	public static final TokenType[] MODIFIERS = {};
+	public static final TokenType[] STORAGE_SPECIFIERS = {STATIC, EXTERN, REGISTER, AUTO};
+	public static final TokenType[] TYPE_QUALIFIERS = {CONST, VOLATILE};
+	public static final TokenType[] TYPE_MODIFIERS = {SHORT, LONG, SIGNED, UNSIGNED};
 	
 	public static final TokenType[] BUILDINDATATYPE = {INT};
 	
 	public static final TokenType[] CONTAINERDATATYPE = {STRUCT, UNION};
 	
+	public static boolean isInGroup(TokenType type, TokenType[] group) {
+		return Arrays.stream(group).anyMatch(t -> t == type);
+	}
+	
+	public static boolean isKeyword(TokenType type) {
+		return isInGroup(type, KEYWORDS);
+	}
+	
+	public static boolean isOperator(TokenType type) {
+		return isInGroup(type, OPERATORS);
+	}
+
+	public static boolean isSeparator(TokenType type) {
+		return isInGroup(type,	SEPARATORS);
+	}
+
+	public static boolean isStorageSpecifier(TokenType type) {
+		return isInGroup(type, STORAGE_SPECIFIERS);
+	}
+	
+	public static boolean isTypeQualifier(TokenType type) {
+		return isInGroup(type, TYPE_QUALIFIERS);
+	}
+
+	public static boolean isTypeModifier(TokenType type) {
+		return isInGroup(type, TYPE_MODIFIERS);
+	}
+
+	public static boolean isBuildinDatatype(TokenType type) {
+		return isInGroup(type, BUILDINDATATYPE);
+	}
+
+	public static boolean isContainerDatatype(TokenType type) {
+		return isInGroup(type, CONTAINERDATATYPE);
+	}
 	
 	TokenType(String spelling) {
 		this.spelling = spelling;

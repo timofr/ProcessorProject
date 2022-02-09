@@ -6,10 +6,10 @@ import lexer.TokenType;
 public class Main {
 
 	private static boolean errorOccured = false;
-
 	public static void main(String[] args)  {
-		System.out.println("test");
+		
 	}
+
 
 	public static void error(int line, String message) {
 		report(line, "", message);

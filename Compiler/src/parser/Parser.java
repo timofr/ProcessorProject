@@ -4,25 +4,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import lexer.Token;
 import lexer.TokenType;
 import main.Main;
-import parser.tree.BuildInDataType;
-import parser.tree.ContainerDataType;
 import parser.tree.DataType;
 import parser.tree.Declaration;
 import parser.tree.ParseTree;
 import parser.tree.Statement;
 import parser.tree.TypedefDataType;
-import parser.tree.TypedefDeclaration;
+import parser.tree.Declaration.ContainerDeclaration;
+import parser.tree.Declaration.TypedefDeclaration;
 
 public class Parser {
-	
 
+	private final List<Supplier<Declaration>> globalDeclarationParser = Arrays.asList(this::parseTypedefDeclaration, this::parseGlobalStorageSpecifierWithSpecifiedDeclaration);
+	private final List<Supplier<Declaration>> localDeclarationParser = Arrays.asList(this::parseTypedefDeclaration);
+	private final List<Supplier<DataType>> dataTypeParser = Arrays.asList();
 	private final List<Token> tokenList;
-	private final List<Declaration> declarations = new ArrayList<Declaration>();
-	private final List<TypedefDeclaration> typedefDeclarations = new ArrayList<TypedefDeclaration>();
+	private final List<Declaration> declarations = new ArrayList<>();
+	private final List<TypedefDeclaration> typedefDeclarations = new ArrayList<>();
+	private final List<ContainerDeclaration> containerDeclaration = new ArrayList<>();
+
 
 	private int position = 0;
 
@@ -40,49 +44,61 @@ public class Parser {
 	}
 
 	private Declaration parseGlobalDeclaration() {
-		Declaration declaration;
-		DataType dataType = parseDataType();
-		if (dataType != null) {
-
-		}
-
-		if ((declaration = parseTypedefDeclaration()) != null) {
-			return declaration;
-		}
-
-		return null;
+		Optional<Declaration> declaration = globalDeclarationParser.stream().map(p -> p.get()).filter(d -> d != null).findAny();
+		return declaration.isPresent() ? declaration.get() : null;
 	}
 
 	private TypedefDeclaration parseTypedefDeclaration()  {
-		if (peek().getType() != TokenType.TYPEDEF) {
+		if (!match(TokenType.TYPEDEF)) {
 			return null;
 		}
-		
-		consume("Expected data type after typedef.");
-		
-		DataType dataType = parseDataType();
-		if (dataType == null) {
-			// TODO throw new ParserException("Expected data type after typedef.", getCurrentLine());
+
+		consume();
+
+		DataType dt = parseDataType();
+		if (dt == null) {
+			error("Expected data type after typedef.");
 		}
-		
-		consume("Expected identifier after data type for a complete typedef.");
-		if (peek().getType() != TokenType.IDENTIFIER) {
-			return null;
+
+		consume();
+		if (!match(TokenType.IDENTIFIER)) {
+			error("Expected identifier after data type for a complete typedef.");
 		}
-		
-		String name = peek().getContent();
-		if (typedefDeclarations.stream().anyMatch(t -> t.getName().equals(name))) {
-			//TODO throw new ParserException("", getCurrentLine());
+
+		String name = peekContent();
+		if (typedefDeclarations.stream().noneMatch(t -> t.getName().equals(name))) {
+			error("Typedef for " + name + " already declared.");
 		}
-		consume("Expected semicolon to complete typedef declaration.");
-		
+		consume();
+		TypedefDeclaration typedefDeclaration = new TypedefDeclaration(name);
+		typedefDeclaration.add(new TypedefDataType(typedefDeclaration, dt));
+		return typedefDeclaration;
+	}
 
+	private Declaration parseGlobalStorageSpecifierWithSpecifiedDeclaration() {
+		return parseStorageSpecifierWithSpecifiedDeclaration(false);
+	}
 
+	private Declaration parseLocalStorageSpecifierWithSpecifiedDeclaration() {
+		return parseStorageSpecifierWithSpecifiedDeclaration(true);
+	}
 
+	private Declaration parseStorageSpecifierWithSpecifiedDeclaration(boolean local) {
+		Declaration.STORAGE_SPECIFIER storageSpecifier = null;
+		if (match(TokenType.STORAGE_SPECIFIERS)) {
+			TokenType tokenType = peekType();
+			if (TokenType.isStorageSpecifier(tokenType)) {
+				storageSpecifier = storageSpecifierFromTokenType(tokenType);
+			} else {
 
-
-
-
+			}
+			consume();
+		}
+		TokenType typeQualifier;
+		if (match(TokenType.TYPE_QUALIFIERS)) {
+			typeQualifier = peekType();
+			consume();
+		}
 		return null;
 	}
 
@@ -104,13 +120,13 @@ public class Parser {
 
 		return null;
 	}
-	
+
 	private TypedefDataType parseTypedefDataType(List<TokenType> qualifiers) {
 		if (peek().getType() != TokenType.IDENTIFIER) {
 			return null;
 		}
 
-		Optional<TypedefDeclaration> typdefDataType = typedefDeclarations.stream()
+		Optional<TypedefDeclaration> typdefDataType = dataTypes.stream()
 				.filter(t -> t.getName().equals(peek().getContent())).findAny();
 
 		if (typdefDataType.isPresent()) {
@@ -152,47 +168,102 @@ public class Parser {
 
 		return null;
 	}
-
-	private List<TokenType> parseQualifier() {
-		return parseKeywordsFromSet(TokenType.QUALIFIERS, "Expected a data type after a qualifier .");
-	}
-
-	private List<TokenType> parseModifier() {
-		return parseKeywordsFromSet(TokenType.MODIFIERS, "Expected a data type after a modifier.");
-	}
-
-	private List<TokenType> parseKeywordsFromSet(TokenType[] keywordSet, String errorMsg) {
-		List<TokenType> keywords = new ArrayList<TokenType>();
-		while (Arrays.stream(keywordSet).anyMatch(t -> t == peek().getType())) {
-			keywords.add(peek().getType());
-			consume(errorMsg);
-		}
-		return keywords;
-	}
-
 	private Statement parseStatement() {
 		// TODO implement this
 		return null;
 	}
+	private List<TokenType> parseKeywordsFromSet(TokenType[] keywordSet, ) {
+		List<TokenType> keywords = new ArrayList<TokenType>();
+		while (Arrays.stream(keywordSet).anyMatch(t -> t == peek().getType())) {
+			keywords.add(peek().getType());
+			consume();
+		}
+		return keywords;
+	}
 
-	private Token consume(String msg) {
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	private Declaration.STORAGE_SPECIFIER storageSpecifierFromTokenType(TokenType type) {
+		switch (type) {
+			case AUTO:
+				return AUTO;
+			case REGISTER:
+				return REGISTER;
+			case EXTERN:
+				return EXTERN;
+			case: STATIC:
+				return STATIC;
+			default:
+				throw IllegalArgumentException("Method expects only AUTO, REGISTER, EXTERN or STATIC as TokenType. All other type cannot be converted");
+		}
+	} 
+
+
+
+
+
+
+	
+	private Token consume() {
 		if (!isAtEnd()) {
 			position++;
 		}
 		return peek();
 	}
 
+	private Token consumeNpoop() {
+		Token t;
+		consume();
+		return t;
+	}
+
 	private Token checkAndConsume(String errorMsg, TokenType... types) {
-		//check(types, errorMsg);
-		consume(errorMsg); //FIXME errormsg will be different
-		return null;
+		check(types, errorMsg);
+		return consume();
 	}
 	private boolean isAtEnd() {
-		return peek().getType() == TokenType.EOF;
+		return match(TokenType.EOF);
 	}
 
 	private Token peek() {
 		return tokenList.get(position);
+	}
+
+	private TokenType peekType() {
+		return peek().getType();
+	}
+
+	private String peekContent() {
+		return peek().getContent();
 	}
 
 	private Token previous() {
@@ -203,9 +274,13 @@ public class Parser {
 		return peek().getLine();
 	}
 
+	private boolean match(TokenType type) {
+		return peek().getType() == type;
+	} 
+
 	private boolean match(TokenType... types) {
 		return Arrays.stream(types).anyMatch(t -> t == peek().getType());
-	} 
+	}
 
 	private void check(TokenType... types) throws ParseException {
 		if (!match(types)) {
@@ -222,6 +297,7 @@ public class Parser {
 		Main.error(peek(), message);
 	    return new ParseException();
 	}
+	
 	
 	private static class ParseException extends Exception {}
 

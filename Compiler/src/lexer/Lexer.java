@@ -104,11 +104,12 @@ public class Lexer {
 		
 		String[] content = {currentString};
 		while (GRAPHICALCHARACTERMATCHER.match(consume())) {
-			if (Arrays.stream(TokenType.OPERATORS).noneMatch(op -> op.getSpelling().startsWith(content[0] + currentChar))) {
+			String assumedContent = content[0] + currentChar; 
+			if (Arrays.stream(TokenType.OPERATORS).noneMatch(op -> op.getSpelling().startsWith(assumedContent))) {
 				break;
 			}
 			
-			content[0] += currentChar;
+			content[0] += assumedContent;
 		}
 		
 		Optional<TokenType> operatorType = Arrays.stream(TokenType.OPERATORS).filter(op -> op.getSpelling().equals(content[0])).findAny();

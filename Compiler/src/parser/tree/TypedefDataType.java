@@ -8,9 +8,13 @@ public class TypedefDataType extends DataType {
 
 	private final TypedefDeclaration typedefDeclaration;
 
-	public TypedefDataType(TypedefDeclaration typedefDeclaration, List<TokenType> qualifiers) {
-		super(qualifiers);
+	public TypedefDataType(TypedefDeclaration typedefDeclaration, DataType dataType) {
+		super(dataType.getQualifiers(), dataType.getModifiers());
 		this.typedefDeclaration = typedefDeclaration;
+	}
+
+	public String getName() {
+		return typedefDeclaration.getName();
 	}
 
 }

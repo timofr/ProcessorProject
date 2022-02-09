@@ -27,7 +27,7 @@ class LexerTest extends AbstractTest {
 	
 	@Test
 	void keywordTest() throws Lexer.LexerException {
-		String input = "int struct union if else while for break continue sizeof";
+		String input = "int struct union if else while for break continue sizeof short long signed unsigned";
 		Lexer lexer = new Lexer(input);
 		List<Token> list = Arrays.asList(
 				new Token(TokenType.INT, "int", 1),
@@ -39,7 +39,12 @@ class LexerTest extends AbstractTest {
 				new Token(TokenType.FOR, "for", 1),
 				new Token(TokenType.BREAK, "break", 1),
 				new Token(TokenType.CONTINUE, "continue", 1),
-				new Token(TokenType.SIZEOF, "sizeof", 1));
+				new Token(TokenType.SIZEOF, "sizeof", 1),
+				new Token(TokenType.SHORT, "short", 1),
+				new Token(TokenType.LONG, "long", 1),
+				new Token(TokenType.SIGNED, "signed", 1),
+				new Token(TokenType.UNSIGNED, "unsigned", 1),
+				new Token(TokenType.GOTO, "goto", 1));
 		assertEquals(list, lexer.getTokenList());
 		assertFalse(Main.hadError());
 	}
